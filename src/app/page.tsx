@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface DiffSegment {
   text: string;
@@ -12,6 +12,9 @@ export default function HomePage() {
   const [rightText, setRightText] = useState("");
   const [diffResults, setDiffResults] = useState<DiffSegment[]>([]);
   const [showResults, setShowResults] = useState(false);
+  
+  const leftTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const rightTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleLeftTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLeftText(e.target.value);
@@ -19,6 +22,24 @@ export default function HomePage() {
 
   const handleRightTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRightText(e.target.value);
+  };
+
+  const handleLeftScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    const leftTextarea = e.currentTarget;
+    const rightTextarea = rightTextareaRef.current;
+    
+    if (rightTextarea) {
+      rightTextarea.scrollTop = leftTextarea.scrollTop;
+    }
+  };
+
+  const handleRightScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    const rightTextarea = e.currentTarget;
+    const leftTextarea = leftTextareaRef.current;
+    
+    if (leftTextarea) {
+      leftTextarea.scrollTop = rightTextarea.scrollTop;
+    }
   };
 
   const handleCompare = () => {
@@ -163,9 +184,11 @@ export default function HomePage() {
             </label>
             <textarea
               id="left-text"
+              ref={leftTextareaRef}
               value={leftText}
               onChange={handleLeftTextChange}
               onKeyDown={handleKeyDown}
+              onScroll={handleLeftScroll}
               className="w-full h-64 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               placeholder="Paste your original text here..."
               aria-label="Original text input"
@@ -181,9 +204,11 @@ export default function HomePage() {
             </label>
             <textarea
               id="right-text"
+              ref={rightTextareaRef}
               value={rightText}
               onChange={handleRightTextChange}
               onKeyDown={handleKeyDown}
+              onScroll={handleRightScroll}
               className="w-full h-64 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               placeholder="Paste your modified text here..."
               aria-label="Modified text input"
